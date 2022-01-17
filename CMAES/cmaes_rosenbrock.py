@@ -42,7 +42,7 @@ for g in range(generations):
         optimizer.tell(solutions)
 
 if not hit:
-    print("not hit global optimal")
+    print("not not not not not hit global optimal")
     print("generations = {}".format(g+1))
     print("NFE = {}".format(NFE))
 
