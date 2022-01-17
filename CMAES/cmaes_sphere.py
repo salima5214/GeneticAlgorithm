@@ -1,4 +1,4 @@
-from cmaes import CMA
+from my_cmaes import CMA
 import numpy as np
 
 import matplotlib.pyplot as plt
