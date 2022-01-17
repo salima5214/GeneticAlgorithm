@@ -72,7 +72,7 @@ class CMA:
         sigma: float,
         bounds: Optional[np.ndarray] = None,
         n_max_resampling: int = 100,
-        seed: Optional[int] = None, 
+        seed: Optional[int] = 1, # None
         population_size: Optional[int] = 100, # None
         cov: Optional[np.ndarray] = None,
     ):
