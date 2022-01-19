@@ -6,6 +6,8 @@ from sklearn.mixture import GaussianMixture
 import heapq
 from copy import deepcopy
 
+
+
 NFE = 0
 
 def evaluate(point):
@@ -14,7 +16,7 @@ def evaluate(point):
     return (100*((point[2]-(point[1]**2))**2)+(1-point[1])**2)+(100*((point[1]-(point[0]**2))**2)+(1-point[0])**2)
 
 optimizer = CMA(mean=np.array([2.5,2.5,2.5]), bounds=np.array([[0,5],[0,5],[0,5]]), sigma=0.5, n_max_resampling=1)
-generations = 16
+generations = 25
 
 sqrt = int(np.sqrt(generations))
 fig, axs = plt.subplots(sqrt, sqrt, num="CMA-ES", sharex=True, sharey=True)
