@@ -1,0 +1,15 @@
+op:
+  task: 2
+
+#----------------------------
+#  0: Sphere
+#  1: Rosenbrock
+#  2: Rastrigin
+#  3: Michalewicz
+#----------------------------
+
+hp:
+  dim: 10
+  generations: 25
+  bound_min: 0
+  bound_max: 5
