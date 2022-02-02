@@ -1,5 +1,5 @@
 op:
-  task: 2
+  task: 1
 
 #----------------------------
 #  0: Sphere
@@ -9,7 +9,9 @@ op:
 #----------------------------
 
 hp:
-  dim: 10
-  generations: 25
+  dim: 5
+  generations: 100
   bound_min: 0
-  bound_max: 5
+  bound_max: 1
+  init_mean: 0.5
+  np_seed: 1

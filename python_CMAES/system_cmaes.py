@@ -11,6 +11,7 @@ import yaml
 config = yaml.load(open('./config.yaml', 'r'), Loader=yaml.FullLoader)
 
 # hp settings
+np.random.seed(config['hp']['np_seed'])
 NFE = 0
 dim = config['hp']['dim']
 generations = config['hp']['generations']
@@ -23,7 +24,8 @@ for i in range(dim):
 my_bounds = np.array(my_bounds_list)
 
 np.ones(dim)
-my_mean = np.ones(dim)*2.5
+init_mean = config['hp']['init_mean']
+my_mean = np.ones(dim)*init_mean
 
 optimizer = CMA(mean=my_mean, bounds=my_bounds, sigma=0.5, n_max_resampling=1)
 
@@ -93,8 +95,7 @@ for g in range(generations):
             solutions.append((point,score))
             scores.append(score)
             chromosomes.append((point[0], point[1]))
-        
-        np.random.seed(1)
+
         EM = GaussianMixture( n_components = 2)
         EM.fit(chromosomes)
         cluster = EM.predict(chromosomes)
