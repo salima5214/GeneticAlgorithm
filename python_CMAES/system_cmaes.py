@@ -7,10 +7,12 @@ import heapq
 from copy import deepcopy
 import math
 import yaml
+from scipy.stats import pearsonr
+
 
 config = yaml.load(open('./config.yaml', 'r'), Loader=yaml.FullLoader)
 
-# hp settings
+# hyperparameter settings
 np.random.seed(config['hp']['np_seed'])
 NFE = 0
 dim = config['hp']['dim']
@@ -18,10 +20,7 @@ generations = config['hp']['generations']
 hit = False
 my_bound_min = config['hp']['bound_min']
 my_bound_max = config['hp']['bound_max']
-my_bounds_list = []
-for i in range(dim):
-    my_bounds_list.append([my_bound_min, my_bound_max])
-my_bounds = np.array(my_bounds_list)
+my_bounds = np.array([[my_bound_min, my_bound_max]]*dim)
 
 np.ones(dim)
 init_mean = config['hp']['init_mean']
@@ -29,6 +28,7 @@ my_mean = np.ones(dim)*init_mean
 
 optimizer = CMA(mean=my_mean, bounds=my_bounds, sigma=0.5, n_max_resampling=1)
 
+# print information of this experiment
 def printInfo(task):
     if task == 0: #  0: Sphere      
         print("Sphere")
@@ -66,12 +66,49 @@ def evaluate(point, task):
         return fitness
 
 
+def calculateMaskCoefficient(MI_points, mask_1, mask_2):
+    r = 0
+    for i in range(len(mask_1)):
+        for j in range(len(mask_2)):
+            r += np.corrcoef(MI_points[:,mask_1[i]], MI_points[:,mask_2[j]])[0, 1]
+    return r
 
+def buildMask(MI_points):
+    masks = np.array([[index] for index in range(len(MI_points[0]))])
+    MI_points = np.array(MI_points)
+    MI_max = -float('inf')
+    mask_order = []
 
+    while(len(masks) >= 2):
+        MI_max = -float('inf')
+        for mask_index1 in range(0, len(masks)-1):
+            for mask_index2 in range(mask_index1+1, len(masks)):
+                r = calculateMaskCoefficient(MI_points, masks[mask_index1], masks[mask_index2])      
+                MI_current = math.log(1/((1-(r*r))**0.5))
+                if MI_current > MI_max or math.isnan(MI_current):
+                    MI_max = MI_current
+                    remove_mask_index = np.array([mask_index1, mask_index2])
+                    new_mask = np.hstack((masks[mask_index1],  masks[mask_index2]))
+
+        print("******************************************")
+        print(masks, "masks_pre")
+        print(mask_order, "mask_order_pre")
+        print(remove_mask_index, "remove_mask_index") 
+        print(new_mask, "new_mask")
+        masks = np.delete(masks, remove_mask_index, axis = 0)
+        masks = masks.tolist()
+        masks.append(new_mask.tolist())
+        mask_order.append(new_mask.tolist())
+        masks = np.array(masks, dtype=object)
+        print(masks, "masks_post")
+        print(mask_order, "mask_order_post")
+        print("******************************************")
+    
+
+        
 points = np.ndarray((generations, optimizer.population_size, config['hp']['dim']))
 points_1 = np.ndarray((generations, optimizer.population_size, config['hp']['dim']))
 points_2 = np.ndarray((generations, optimizer.population_size, config['hp']['dim']))
-
 
 
 
@@ -80,9 +117,10 @@ for g in range(generations):
     if not hit:
         solutions = []
         scores = []
+        MI_points = []
         chromosomes = []
         for i in range(optimizer.population_size):
-            point = optimizer.ask() # sample next chromosome   
+            point = optimizer.ask() # ! sample next chromosome   
             points[g, i] = point # record
             # print(point)
             score = evaluate(point, config['op']['task']) # evaluate fitness
@@ -93,9 +131,11 @@ for g in range(generations):
                 print("NFE = {}".format(NFE))
                 hit = True     
             solutions.append((point,score))
+            MI_points.append(point) # ! to calculate MI for buildMask
             scores.append(score)
             chromosomes.append((point[0], point[1]))
 
+        buildMask(MI_points) # ! to get mask order
         EM = GaussianMixture( n_components = 2)
         EM.fit(chromosomes)
         cluster = EM.predict(chromosomes)
@@ -177,5 +217,3 @@ if not hit:
 #     ax.set_ylim([0,5])
 
 # plt.savefig('cmaes_test.png')
-
-
