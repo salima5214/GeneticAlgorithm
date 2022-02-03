@@ -133,7 +133,7 @@ for g in range(generations):
             solutions.append((point,score))
             MI_points.append(point) # ! to calculate MI for buildMask
             scores.append(score)
-            chromosomes.append((point[0], point[1]))
+            chromosomes.append((point[0], point[1])) # TODO
 
         buildMask(MI_points) # ! to get mask order
         EM = GaussianMixture( n_components = 2)
