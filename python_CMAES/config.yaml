@@ -10,7 +10,7 @@ op:
 
 hp:
   dim: 10
-  generations: 100
+  generations: 1000
   bound_min: 0
   bound_max: 5
   init_mean: 2.5

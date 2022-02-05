@@ -8,11 +8,7 @@ from copy import deepcopy
 import math
 import yaml
 from scipy.stats import pearsonr
-from csv import writer
-import argparse
-parser = argparse.ArgumentParser()
-parser.add_argument("top", help="top number", type=int)
-args = parser.parse_args()
+
 
 config = yaml.load(open('./config.yaml', 'r'), Loader=yaml.FullLoader)
 
@@ -78,7 +74,7 @@ def calculateMI(MI_points, mask_1, mask_2):
             r += np.corrcoef(MI_points[:,mask_1[i]], MI_points[:,mask_2[j]])[0, 1]
             count += 1
             # print(np.corrcoef(MI_points[:,mask_1[i]], MI_points[:,mask_2[j]])[0, 1])
-    r = r / count # FIXME
+    r = r / count
     return math.log(1/((1-(r*r))**0.5))
 
 def buildMask(MI_points):
@@ -117,6 +113,8 @@ points = np.ndarray((generations, optimizer.population_size, config['hp']['dim']
 points_1 = np.ndarray((generations, optimizer.population_size, config['hp']['dim']))
 points_2 = np.ndarray((generations, optimizer.population_size, config['hp']['dim']))
 
+
+
 for g in range(generations):
     if hit: break
     if not hit:
@@ -134,33 +132,23 @@ for g in range(generations):
                 print("point = {}".format(point))
                 print("generations = {}".format(g+1))
                 print("NFE = {}".format(NFE))
-                hit = True
-                with open('output.csv', 'a', newline='') as f_object:  
-                    # Pass the CSV  file object to the writer() function
-                    writer_object = writer(f_object)
-                    # Result - a writer object
-                    # Pass the data in the list as an argument into the writerow() function
-                    record = [args.top, NFE]
-                    writer_object.writerow(record)  
-                    # Close the file object
-                    f_object.close()
+                hit = True     
             solutions.append((point,score))
             MI_points.append(point) # ! to calculate MI for buildMask
             scores.append(score)
 
         mask_order = buildMask(MI_points) # ! to get mask order
-##################################################################
         chromosomes = []
+
         for point in MI_points:
-            chromosomes.append((point[mask_order[0][0]], point[mask_order[0][1]]))
-            # chromosomes.append((point[0], point[1]))
-        # print(chromosomes)
+            # chromosomes.append((point[mask_order[0][0]], point[mask_order[0][1]]))
+            chromosomes.append((point[0], point[1]))
         # print("generations: {}, mask_order: {}".format(g, mask_order))
         EM = GaussianMixture( n_components = 2)
         EM.fit(chromosomes)
         cluster = EM.predict(chromosomes)
         # print(cluster)
-####################################################################
+
         min_index_list = list(map(scores.index, heapq.nsmallest(100, scores)))
         count_0 = 0
         count_1 = 0
@@ -180,26 +168,38 @@ for g in range(generations):
                 break
 
 
-        for i in range(args.top): 
+        for i in range(0):
             # set_trace()
-            if g <= 3 and chromosomes_0[i][0][1] < chromosomes_1[i][0][1]:
+            if g <= 5 and chromosomes_0[i][0][1] < chromosomes_1[i][0][1]:
                 temp = deepcopy(solutions[chromosomes_1[i][1]])
-                temp[0][mask_order[0][0]] = solutions[chromosomes_0[i][1]][0][mask_order[0][0]]
-                temp[0][mask_order[0][1]] = solutions[chromosomes_0[i][1]][0][mask_order[0][1]]
-                # if evaluate(temp[0], config['op']['task']) < evaluate(solutions[chromosomes_1[i][1]][0], config['op']['task']):
+                temp[0][0] = solutions[chromosomes_0[i][1]][0][0]
+                temp[0][1] = solutions[chromosomes_0[i][1]][0][1]
+                # if evaluate(temp[0]) < evaluate(solutions[chromosomes_1[i][1]][0]):
                 if True:
                     print("+++++++++++++++++++")
-                    solutions[chromosomes_1[i][1]][0][mask_order[0][0]] = solutions[chromosomes_0[i][1]][0][mask_order[0][0]]
-                    solutions[chromosomes_1[i][1]][0][mask_order[0][1]] = solutions[chromosomes_0[i][1]][0][mask_order[0][1]]
-            elif g <= 3 and chromosomes_0[i][0][1] > chromosomes_1[i][0][1]:
+                    solutions[chromosomes_1[i][1]][0][0] = solutions[chromosomes_0[i][1]][0][0]
+                    solutions[chromosomes_1[i][1]][0][1] = solutions[chromosomes_0[i][1]][0][1]
+            elif g <= 5 and chromosomes_0[i][0][1] > chromosomes_1[i][0][1]:
                 temp = deepcopy(solutions[chromosomes_0[i][1]])
-                temp[0][mask_order[0][0]] = solutions[chromosomes_1[i][1]][0][mask_order[0][0]]
-                temp[0][mask_order[0][1]] = solutions[chromosomes_1[i][1]][0][mask_order[0][1]]
-                # if evaluate(temp[0], config['op']['task']) < evaluate(solutions[chromosomes_0[i][1]][0], config['op']['task']):
+                temp[0][0] = solutions[chromosomes_1[i][1]][0][0]
+                temp[0][1] = solutions[chromosomes_1[i][1]][0][1]
+                # if evaluate(temp[0]) < evaluate(solutions[chromosomes_0[i][1]][0]):
                 if True:
                     print("#####################")
-                    solutions[chromosomes_0[i][1]][0][mask_order[0][0]] = solutions[chromosomes_1[i][1]][0][mask_order[0][0]]
-                    solutions[chromosomes_0[i][1]][0][mask_order[0][1]] = solutions[chromosomes_1[i][1]][0][mask_order[0][1]]
+                    solutions[chromosomes_0[i][1]][0][0] = solutions[chromosomes_1[i][1]][0][0]
+                    solutions[chromosomes_0[i][1]][0][1] = solutions[chromosomes_1[i][1]][0][1]
+
+
+        index_1 = 0
+        index_2 = 0
+        for i in range(optimizer.population_size):
+            if cluster[i] == 0:
+                points_1[g, index_1] = points[g, i]
+                index_1 += 1
+            else:
+                points_2[g, index_2] = points[g, i]
+                index_2 += 1
+
         optimizer.tell(solutions)
 
 if not hit:
@@ -212,4 +212,16 @@ if not hit:
 
 
 
+# sqrt = int(np.sqrt(generations))
+# fig, axs = plt.subplots(sqrt, sqrt, num="CMA-ES", sharex=True, sharey=True)
 
+# target = np.array([1, 1, 1])
+# for i in range(generations):
+#     ax = axs[i//sqrt, i%sqrt]
+#     ax.scatter(*zip(*points_1[i]), c="b")
+#     ax.scatter(*zip(*points_2[i]), c="r")
+#     # ax.scatter(*target,c="r")
+#     ax.set_xlim([0,5])
+#     ax.set_ylim([0,5])
+
+# plt.savefig('cmaes_test.png')
