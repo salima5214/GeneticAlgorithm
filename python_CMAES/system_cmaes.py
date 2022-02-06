@@ -121,6 +121,7 @@ def LinkageTree(MI_points): # ! Linkage Tree
     return mask_order
 
 def ILS(MI_points): # ! ILS
+    random.seed(1)
     init_index = random.randint(0, len(MI_points[0])-1)
     # print("init_index: ", init_index)
     in_mask = [init_index]
@@ -198,16 +199,19 @@ for g in range(generations):
             MI_points.append(point) # ! to calculate MI for buildMask
             scores.append(score)
 
-        mask_order = buildMaskOrder(MI_points, config) # ! to get mask order (now: Linkage Tree)
+        mask_order = buildMaskOrder(MI_points, config) # ! to get mask order 
     
         # print(mask_order)
-        chromosomes = reductDimension(MI_points, 0) # 0 means the index of mask_order
+        chromosomes = reductDimension(MI_points, 0) # 0 means the index of mask_order # TODO: the index of mask_order automatically
         # print("generations: {}, mask_order: {}".format(g, mask_order))
         EM = GaussianMixture( n_components = 2)
         EM.fit(chromosomes)
         cluster = EM.predict(chromosomes)   
 
 #########################################################################################
+#########################################################################################
+#########################################################################################
+
         min_index_list = list(map(scores.index, heapq.nsmallest(100, scores)))
         count_0 = 0
         count_1 = 0
