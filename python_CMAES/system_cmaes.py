@@ -253,7 +253,7 @@ if not hit:
     print("not not not not not hit global optimal")
     with open('record_{}.csv'.format(time.strftime("%Y-%m-%d", time.localtime())), 'a', newline='') as f_object:  
         writer_object = writer(f_object)
-        record = [args.top, -1]
+        record = [-1, -1]
         writer_object.writerow(record)  
         f_object.close()
     # print("generations = {}".format(g+1))
