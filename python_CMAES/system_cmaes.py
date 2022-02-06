@@ -201,11 +201,12 @@ for g in range(generations):
         mask_order = buildMaskOrder(MI_points, config) # ! to get mask order (now: Linkage Tree)
     
         # print(mask_order)
-        chromosomes = reductDimension(MI_points, 0)
+        chromosomes = reductDimension(MI_points, 0) # 0 means the index of mask_order
         # print("generations: {}, mask_order: {}".format(g, mask_order))
         EM = GaussianMixture( n_components = 2)
         EM.fit(chromosomes)
         cluster = EM.predict(chromosomes)   
+
 #########################################################################################
         min_index_list = list(map(scores.index, heapq.nsmallest(100, scores)))
         count_0 = 0
