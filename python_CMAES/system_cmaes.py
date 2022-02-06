@@ -8,11 +8,17 @@ from copy import deepcopy
 import math
 import yaml
 from scipy.stats import pearsonr
+import time
 from csv import writer
 import argparse
-parser = argparse.ArgumentParser()
-parser.add_argument("top", help="top number", type=int)
-args = parser.parse_args()
+import random
+import colorama
+from colorama import Fore
+from colorama import Style
+
+# parser = argparse.ArgumentParser()
+# parser.add_argument("top", help="top number", type=int)
+# args = parser.parse_args()
 
 config = yaml.load(open('./config.yaml', 'r'), Loader=yaml.FullLoader)
 
@@ -33,19 +39,22 @@ my_mean = np.ones(dim)*init_mean
 optimizer = CMA(mean=my_mean, bounds=my_bounds, sigma=0.5, n_max_resampling=1)
 
 # print information of this experiment
-def printInfo(task):
-    if task == 0: #  0: Sphere      
-        print("Sphere")
-    elif task == 1: #  1: Rosenbrock
-        print("Rosenbrock")
-    elif task == 2: #  2: Rastrigin
-        print("Rastrigin")
-    elif task == 3: #  3: Michalewicz
-        print("Michalewicz")
-    print("dim = {} ".format(config['hp']['dim']))
+def printInfo(config):
+    if config['op']['task'] == 0: #  0: Sphere      
+        print(Fore.MAGENTA + Style.BRIGHT + "Problem: Sphere")
+    elif config['op']['task'] == 1: #  1: Rosenbrock
+        print(Fore.MAGENTA + Style.BRIGHT + "Problem: Rosenbrock")
+    elif config['op']['task'] == 2: #  2: Rastrigin
+        print(Fore.MAGENTA + Style.BRIGHT + "Problem: Rastrigin")
+    elif config['op']['task'] == 3: #  3: Michalewicz
+        print(Fore.MAGENTA + Style.BRIGHT + "Problem: Michalewicz")
 
-task = config['op']['task']
-printInfo(task)
+    if config['op']['mask_order'] == 0: #  0: linkage tree order    
+        print(Fore.CYAN + Style.BRIGHT + "The way of mask order: linkage tree order")
+    elif config['op']['mask_order'] == 1: #  1: incremental linkage set
+        print(Fore.CYAN + Style.BRIGHT + "The way of mask order: incremental linkage set")
+    
+    print(Fore.BLUE + Style.BRIGHT + "dim = {} ".format(config['hp']['dim']))
 
 def evaluate(point, task):
     global NFE
@@ -69,22 +78,21 @@ def evaluate(point, task):
             fitness += (-1*(math.sin(point[i]))*math.pow(math.sin((i+1)*point[i]*point[i]/(math.pi)),20))
         return fitness
 
-
 def calculateMI(MI_points, mask_1, mask_2):
-    r = 0
+    MI = 0
     count = 0
     for i in range(len(mask_1)):
         for j in range(len(mask_2)):
-            r += np.corrcoef(MI_points[:,mask_1[i]], MI_points[:,mask_2[j]])[0, 1]
+            r = np.corrcoef(MI_points[:,mask_1[i]], MI_points[:,mask_2[j]])[0, 1]
+            MI += math.log(1/((1-(r*r))**0.5))
             count += 1
             # print(np.corrcoef(MI_points[:,mask_1[i]], MI_points[:,mask_2[j]])[0, 1])
-    r = r / count # FIXME
-    return math.log(1/((1-(r*r))**0.5))
+    MI = MI / count # FIXME: the way to calculate MI for two masks
+    return MI
 
-def buildMask(MI_points):
+def LinkageTree(MI_points): # ! Linkage Tree
     masks = np.array([[index] for index in range(len(MI_points[0]))])
     MI_points = np.array(MI_points)
-    MI_max = -float('inf')
     mask_order = []
 
     while(len(masks) >= 2):
@@ -112,11 +120,57 @@ def buildMask(MI_points):
         # print("******************************************")
     return mask_order
 
-        
+def ILS(MI_points): # ! ILS
+    init_index = random.randint(0, len(MI_points[0])-1)
+    # print("init_index: ", init_index)
+    in_mask = [init_index]
+    out_mask = [index for index in range(0, len(MI_points[0])) if index is not init_index]
+    # mask_order = []
+    # mask_order.append(in_mask)
+    for i in range(len(MI_points[0])-1):
+        MI_max = -float('inf')
+        for out_mask_index in out_mask:
+            for in_mask_index in in_mask: 
+                MI_current = calculateMI(np.array(MI_points), np.array([out_mask_index]), np.array(in_mask))
+                if MI_current > MI_max or math.isnan(MI_current):
+                    MI_max = MI_current
+                    remove_mask_index = out_mask_index
+
+        out_mask.remove(remove_mask_index)
+        in_mask.append(remove_mask_index)
+        # mask_order.append(in_mask)
+        # print("i = {} , in_mask = {}, out_mask = {}".format(i, in_mask, out_mask))
+
+    mask_order = []
+
+    for i in range(1, len(in_mask)):
+        mask = []
+        for j in range(i+1):
+            mask.append(in_mask[j])
+        mask_order.append(mask)   
+    # print("mask_order = {}".format(mask_order))
+    return mask_order
+
+def buildMaskOrder(MI_points, config):
+    if config['op']['mask_order'] == 0: #  0: linkage tree order    
+        return LinkageTree(MI_points)
+    elif config['op']['mask_order'] == 1: #  1: incremental linkage set
+        return ILS(MI_points)
+
+def reductDimension(MI_points, mask_order_index):
+    chromosomes = []
+    for i in range(0, len(MI_points)):
+        for j in range(0, len(mask_order[mask_order_index])):
+            if j == 0:
+                chromosomes.append([])
+            chromosomes[i].append(MI_points[i][mask_order[mask_order_index][j]])
+    return chromosomes
+
 points = np.ndarray((generations, optimizer.population_size, config['hp']['dim']))
 points_1 = np.ndarray((generations, optimizer.population_size, config['hp']['dim']))
 points_2 = np.ndarray((generations, optimizer.population_size, config['hp']['dim']))
 
+printInfo(config)
 for g in range(generations):
     if hit: break
     if not hit:
@@ -129,44 +183,36 @@ for g in range(generations):
             points[g, i] = point # record
 
             score = evaluate(point, config['op']['task']) # evaluate fitness
-            if score < 0.001 and not hit:
-                print("hit global optimal")
-                print("point = {}".format(point))
+            if score < 0.001 and not hit: # FIXME: check global optima value always = 0?
+                print(Fore.RED + Style.BRIGHT + "hit global optimal")
+                print(Fore.WHITE + Style.BRIGHT + "point = {}".format(point))
                 print("generations = {}".format(g+1))
-                print("NFE = {}".format(NFE))
+                print(Fore.YELLOW + Style.BRIGHT + "NFE = {}".format(NFE))
                 hit = True
-                with open('output.csv', 'a', newline='') as f_object:  
-                    # Pass the CSV  file object to the writer() function
+                with open('record_{}.csv'.format(time.strftime("%Y-%m-%d", time.localtime())), 'a', newline='') as f_object:  
                     writer_object = writer(f_object)
-                    # Result - a writer object
-                    # Pass the data in the list as an argument into the writerow() function
-                    record = [args.top, NFE]
+                    record = [0, NFE]
                     writer_object.writerow(record)  
-                    # Close the file object
                     f_object.close()
             solutions.append((point,score))
             MI_points.append(point) # ! to calculate MI for buildMask
             scores.append(score)
 
-        mask_order = buildMask(MI_points) # ! to get mask order
-##################################################################
-        chromosomes = []
-        for point in MI_points:
-            chromosomes.append((point[mask_order[0][0]], point[mask_order[0][1]]))
-            # chromosomes.append((point[0], point[1]))
-        # print(chromosomes)
+        mask_order = buildMaskOrder(MI_points, config) # ! to get mask order (now: Linkage Tree)
+    
+        # print(mask_order)
+        chromosomes = reductDimension(MI_points, 0)
         # print("generations: {}, mask_order: {}".format(g, mask_order))
         EM = GaussianMixture( n_components = 2)
         EM.fit(chromosomes)
-        cluster = EM.predict(chromosomes)
-        # print(cluster)
-####################################################################
+        cluster = EM.predict(chromosomes)   
+#########################################################################################
         min_index_list = list(map(scores.index, heapq.nsmallest(100, scores)))
         count_0 = 0
         count_1 = 0
         chromosomes_0 = []
         chromosomes_1 = []
-
+        # TODO: cluster automatically
         for i in range(100):
             if cluster[min_index_list[i]] == 0 and count_0 <= 20:
                 chromosomes_0.append((solutions[min_index_list[i]], min_index_list[i]))
@@ -179,8 +225,8 @@ for g in range(generations):
             else:
                 break
 
-
-        for i in range(args.top): 
+        # TODO: RM & BM use sample method
+        for i in range(5): 
             # set_trace()
             if g <= 3 and chromosomes_0[i][0][1] < chromosomes_1[i][0][1]:
                 temp = deepcopy(solutions[chromosomes_1[i][1]])
@@ -188,7 +234,7 @@ for g in range(generations):
                 temp[0][mask_order[0][1]] = solutions[chromosomes_0[i][1]][0][mask_order[0][1]]
                 # if evaluate(temp[0], config['op']['task']) < evaluate(solutions[chromosomes_1[i][1]][0], config['op']['task']):
                 if True:
-                    print("+++++++++++++++++++")
+                    # print("+++++++++++++++++++")
                     solutions[chromosomes_1[i][1]][0][mask_order[0][0]] = solutions[chromosomes_0[i][1]][0][mask_order[0][0]]
                     solutions[chromosomes_1[i][1]][0][mask_order[0][1]] = solutions[chromosomes_0[i][1]][0][mask_order[0][1]]
             elif g <= 3 and chromosomes_0[i][0][1] > chromosomes_1[i][0][1]:
@@ -197,13 +243,18 @@ for g in range(generations):
                 temp[0][mask_order[0][1]] = solutions[chromosomes_1[i][1]][0][mask_order[0][1]]
                 # if evaluate(temp[0], config['op']['task']) < evaluate(solutions[chromosomes_0[i][1]][0], config['op']['task']):
                 if True:
-                    print("#####################")
+                    # print("#####################")
                     solutions[chromosomes_0[i][1]][0][mask_order[0][0]] = solutions[chromosomes_1[i][1]][0][mask_order[0][0]]
                     solutions[chromosomes_0[i][1]][0][mask_order[0][1]] = solutions[chromosomes_1[i][1]][0][mask_order[0][1]]
         optimizer.tell(solutions)
 
 if not hit:
     print("not not not not not hit global optimal")
+    with open('record_{}.csv'.format(time.strftime("%Y-%m-%d", time.localtime())), 'a', newline='') as f_object:  
+        writer_object = writer(f_object)
+        record = [args.top, -1]
+        writer_object.writerow(record)  
+        f_object.close()
     # print("generations = {}".format(g+1))
     # print("NFE = {}".format(NFE))
 

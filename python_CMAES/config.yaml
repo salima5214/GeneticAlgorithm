@@ -1,15 +1,20 @@
 op:
   task: 1
-
 #----------------------------
 #  0: Sphere
 #  1: Rosenbrock
 #  2: Rastrigin
 #  3: Michalewicz
 #----------------------------
+  mask_order: 1
+#----------------------------
+#  0: linkage tree order
+#  1: incremental linkage set (ILS)
+#----------------------------
+
 
 hp:
-  dim: 10
+  dim: 3
   generations: 1000
   bound_min: 0
   bound_max: 5
