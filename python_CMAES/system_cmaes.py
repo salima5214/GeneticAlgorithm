@@ -199,7 +199,7 @@ def RM_BM(RM_time):
         update_score = evaluate(temp_receiver, config['op']['task'])
         # print("new:" , update_score)
 
-        if update_score > receiver[1]:
+        if update_score < receiver[1]:
             cluster_chromosomes[RM_component_index][RM_receiver_index][0] = temp_receiver
             cluster_chromosomes[RM_component_index][RM_receiver_index][1] = update_score
             print("RM sucess")
@@ -221,13 +221,15 @@ def RM_BM(RM_time):
             BM_update_score = evaluate(BM_temp_receiver, config['op']['task'])
             # print("new:" , update_score)
 
-            if BM_update_score > BM_receiver[1]:
+            if BM_update_score < BM_receiver[1]:
                 cluster_chromosomes[BM_component_index][BM_receiver_index][0] = BM_temp_receiver
                 cluster_chromosomes[BM_component_index][BM_receiver_index][1] = BM_update_score
                 print("BM sucess")
                 print("---------------------------")
 
     return cluster_chromosomes
+
+
 
 
 
@@ -278,7 +280,7 @@ for g in range(generations):
 #         3. 同群中隨機挑一個 chromosome 當作 Recevier  # ! ok
 #         4. 由 同群 2. sample 出一個 Donor # ! ok
 #         5. Donor 給 Recevier 看 fitness 有無變好 # ! ok
-#         6. 有變好的話, sample (Donor) 給其他群試試 (其他群先 隨機挑一個 chromosome 當作 Recevier)
+#         6. 有變好的話, sample (Donor) 給其他群試試 (其他群先 隨機挑一個 chromosome 當作 Recevier) # ! ok
 #         # ? solutions [ (array([dim0_value, dim1_value, dim2_value]), fitness_score), (array([dim0_value, dim1_value, dim2_value]), fitness_score), ...]
 # """
         # solutions.append((point,score)) # ! to CMAES

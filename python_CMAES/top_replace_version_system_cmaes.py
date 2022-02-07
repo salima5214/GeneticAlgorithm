@@ -238,7 +238,7 @@ for g in range(generations):
                 temp[0][mask_order[0][0]] = solutions[chromosomes_0[i][1]][0][mask_order[0][0]]
                 temp[0][mask_order[0][1]] = solutions[chromosomes_0[i][1]][0][mask_order[0][1]]
                 # if evaluate(temp[0], config['op']['task']) < evaluate(solutions[chromosomes_1[i][1]][0], config['op']['task']):
-                if True:
+                if True: # FIXME: need to update fitness score
                     # print("+++++++++++++++++++")
                     solutions[chromosomes_1[i][1]][0][mask_order[0][0]] = solutions[chromosomes_0[i][1]][0][mask_order[0][0]]
                     solutions[chromosomes_1[i][1]][0][mask_order[0][1]] = solutions[chromosomes_0[i][1]][0][mask_order[0][1]]
