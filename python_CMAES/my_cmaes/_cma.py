@@ -7,6 +7,8 @@ from typing import Dict
 from typing import List
 from typing import Optional
 from typing import Tuple
+import yaml # Salima
+config = yaml.load(open('./config.yaml', 'r'), Loader=yaml.FullLoader) # Salima
 
 
 _EPS = 1e-8
@@ -72,7 +74,7 @@ class CMA:
         sigma: float,
         bounds: Optional[np.ndarray] = None,
         n_max_resampling: int = 100,
-        seed: Optional[int] = 1, # None
+        seed: Optional[int] = config['hp']['cma_seed'], # None config['hp']['cma_seed']
         population_size: Optional[int] = 100, # None
         cov: Optional[np.ndarray] = None,
     ):

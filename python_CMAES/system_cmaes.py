@@ -121,7 +121,7 @@ def byLinkageTree(MI_points): # ! Linkage Tree
     return mask_order
 
 def byIncrementalLinkageSet(MI_points): # ! ILS
-    random.seed(1) # FIXME: how to set the seed
+    # random.seed(1) # FIXME: how to set the seed
     init_index = random.randint(0, len(MI_points[0])-1)
     # print("init_index: ", init_index)
     in_mask = [init_index]
@@ -167,18 +167,23 @@ def reductDimension(MI_points, mask_order_index):
             chromosomes[i].append(MI_points[i][mask_order[mask_order_index][j]])
     return chromosomes
 
-def RM(RM_count):
+def RM_BM(RM_time):
+    # for i in range(config['hp']['components']):
+    #     RM_component_index = i
+    
     # random.seed(1)
     RM_component_index = random.randint(0, config['hp']['components']-1)
-    
-    # ? donor supply
+    # print("RM_component_index", RM_component_index)
+
+    # ! donor supply
     donor_supply  = []
     for i in range(len(mask_order[mask_order_index])):
         donor_supply.append([])
         for j in range(len(top_cluster_chromosomes[RM_component_index])):
             donor_supply[i].append(top_cluster_chromosomes[RM_component_index][j][0][mask_order[mask_order_index][i]])
     
-    for i in range(RM_count):
+    # ! for the same component do RM() with RM_time # TODO: design the flow
+    for i in range(RM_time):
         RM_receiver_index = random.randint(0, len(cluster_chromosomes[RM_component_index])-1)
         receiver = cluster_chromosomes[RM_component_index][RM_receiver_index] # ? receiver       
         
@@ -197,7 +202,31 @@ def RM(RM_count):
         if update_score > receiver[1]:
             cluster_chromosomes[RM_component_index][RM_receiver_index][0] = temp_receiver
             cluster_chromosomes[RM_component_index][RM_receiver_index][1] = update_score
-    
+            print("RM sucess")
+            # ! BM
+            BM_component_index = random.randint(0, config['hp']['components']-1)
+            while(BM_component_index == RM_component_index):
+                BM_component_index = random.randint(0, config['hp']['components']-1)
+
+            BM_receiver_index = random.randint(0, len(cluster_chromosomes[BM_component_index])-1) 
+            BM_receiver = cluster_chromosomes[BM_component_index][BM_receiver_index]
+
+            BM_temp_receiver = deepcopy(BM_receiver[0])
+            for i in range(len(mask_order[mask_order_index])):
+                mu = np.mean(donor_supply[i])
+                sigma = np.std(donor_supply[i])
+                donor = random.gauss(mu, sigma)
+                BM_temp_receiver[mask_order[mask_order_index][i]] = donor
+
+            BM_update_score = evaluate(BM_temp_receiver, config['op']['task'])
+            # print("new:" , update_score)
+
+            if BM_update_score > BM_receiver[1]:
+                cluster_chromosomes[BM_component_index][BM_receiver_index][0] = BM_temp_receiver
+                cluster_chromosomes[BM_component_index][BM_receiver_index][1] = BM_update_score
+                print("BM sucess")
+                print("---------------------------")
+
     return cluster_chromosomes
 
 
@@ -274,7 +303,7 @@ for g in range(generations):
             top_cluster_chromosomes[i] = cluster_chromosomes[i][:top_number[i]]
      
 
-        cluster_chromosomes = RM(1) # ! RM
+        cluster_chromosomes = RM_BM(config['hp']['RM_time']) # ! RM
         solutions = []
         for i in range(config['hp']['components']):
             for j in range(len(cluster_chromosomes[i])):
