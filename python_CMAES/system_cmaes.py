@@ -54,7 +54,7 @@ def printInfo(config):
     elif config['op']['mask_order'] == 1: #  1: incremental linkage set
         print(Fore.CYAN + Style.BRIGHT + "The way of mask order: incremental linkage set")
     
-    print(Fore.BLUE + Style.BRIGHT + "dim = {} ".format(config['hp']['dim']))
+    print(Fore.BLUE + Style.BRIGHT + "dimension: {} ".format(config['hp']['dim']))
 
 def evaluate(point, task):
     global NFE
@@ -86,7 +86,6 @@ def calculateMI(MI_points, mask_1, mask_2):
             r = np.corrcoef(MI_points[:,mask_1[i]], MI_points[:,mask_2[j]])[0, 1]
             MI += math.log(1/((1-(r*r))**0.5))
             count += 1
-            # print(np.corrcoef(MI_points[:,mask_1[i]], MI_points[:,mask_2[j]])[0, 1])
     MI = MI / count # FIXME: the way to calculate MI for two masks
     return MI
 
@@ -186,9 +185,9 @@ for g in range(generations):
             score = evaluate(point, config['op']['task']) # evaluate fitness
             if score < 0.001 and not hit: # FIXME: check global optima value always = 0?
                 print(Fore.RED + Style.BRIGHT + "hit global optimal")
-                print(Fore.WHITE + Style.BRIGHT + "point = {}".format(point))
-                print("generations = {}".format(g+1))
-                print(Fore.YELLOW + Style.BRIGHT + "NFE = {}".format(NFE))
+                print(Fore.WHITE + Style.BRIGHT + "hit point: {}".format(point))
+                print("generations: {}".format(g+1))
+                print(Fore.YELLOW + Style.BRIGHT + "NFE: {}".format(NFE))
                 hit = True
                 with open('record_{}.csv'.format(time.strftime("%Y-%m-%d", time.localtime())), 'a', newline='') as f_object:  
                     writer_object = writer(f_object)
@@ -254,7 +253,7 @@ for g in range(generations):
         optimizer.tell(solutions)
 
 if not hit:
-    print("not not not not not hit global optimal")
+    print(Fore.YELLOW + Style.BRIGHT + "not hit global optimal")
     with open('record_{}.csv'.format(time.strftime("%Y-%m-%d", time.localtime())), 'a', newline='') as f_object:  
         writer_object = writer(f_object)
         record = [-1, -1]

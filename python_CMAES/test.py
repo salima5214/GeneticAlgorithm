@@ -1,21 +1,26 @@
 import numpy as np
-import random
 
-import colorama
-from colorama import Fore
-from colorama import Style
 
-colorama.init()
-print(Fore.BLUE + Style.BRIGHT + "This is the color of the sky")
-print(Fore.GREEN + "This is the color of grass")
-print(Fore.MAGENTA + Style.BRIGHT + "This is a dimmer version of the sky")
-print(Fore.YELLOW + Style.BRIGHT + "This is a dimmer version of the sky")
-print(Fore.WHITE + Style.BRIGHT + "This is a dimmer version of the sky")
-print(Fore.CYAN + Style.BRIGHT + "This is a dimmer version of the sky")
-print(Fore.BLACK + Style.BRIGHT + "This is a dimmer version of the sky")
 
-print(Fore.RED + Style.DIM + "This is a dimmer version of the sky")
-print(Fore.YELLOW + "This is the color of the sun" + Style.RESET_ALL)
+
+
+
+# !
+# import colorama
+# from colorama import Fore
+# from colorama import Style
+
+# colorama.init()
+# print(Fore.BLUE + Style.BRIGHT + "This is the color of the sky")
+# print(Fore.GREEN + "This is the color of grass")
+# print(Fore.MAGENTA + Style.BRIGHT + "This is a dimmer version of the sky")
+# print(Fore.YELLOW + Style.BRIGHT + "This is a dimmer version of the sky")
+# print(Fore.WHITE + Style.BRIGHT + "This is a dimmer version of the sky")
+# print(Fore.CYAN + Style.BRIGHT + "This is a dimmer version of the sky")
+# print(Fore.BLACK + Style.BRIGHT + "This is a dimmer version of the sky")
+
+# print(Fore.RED + Style.DIM + "This is a dimmer version of the sky")
+# print(Fore.YELLOW + "This is the color of the sun" + Style.RESET_ALL)
 
 
 # !

@@ -14,7 +14,7 @@ op:
 
 
 hp:
-  dim: 3
+  dim: 5
   generations: 1000
   bound_min: 0
   bound_max: 5
