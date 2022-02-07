@@ -193,7 +193,7 @@ for g in range(generations):
                     record = [g+1, NFE]
                     writer_object.writerow(record)  
                     f_object.close()
-            solutions.append((point,score)) # ! to CMAES
+            solutions.append([point,score]) # ! to CMAES
             MI_points.append(point) # ? to calculate MI for buildMask
             scores.append(score)
 
@@ -212,7 +212,7 @@ for g in range(generations):
 #         2. 每群計算 mean 以及 std (從每群中fitness分數較高的) # ! ok
 #         3. 同群中隨機挑一個 chromosome 當作 Recevier  # ! ok
 #         4. 由 同群 2. sample 出一個 Donor # ! ok
-#         5. Donor 給 Recevier 看 fitness 有無變好
+#         5. Donor 給 Recevier 看 fitness 有無變好 # ! ok
 #         6. 有變好的話, sample (Donor) 給其他群試試 (其他群先 隨機挑一個 chromosome 當作 Recevier)
 #         # ? solutions [ (array([dim0_value, dim1_value, dim2_value]), fitness_score), (array([dim0_value, dim1_value, dim2_value]), fitness_score), ...]
 # """
@@ -234,7 +234,7 @@ for g in range(generations):
         for i in range(config['hp']['components']):
             top_cluster_chromosomes[i] = cluster_chromosomes[i][:top_number[i]]
 
-        random.seed(1)
+        # random.seed(1)
         RM_component_index = random.randint(0, config['hp']['components']-1)
         RM_receiver_index = random.randint(0, len(cluster_chromosomes[RM_component_index])-1)
         receiver = cluster_chromosomes[RM_component_index][RM_receiver_index] # ? receiver       
@@ -252,25 +252,31 @@ for g in range(generations):
                 donor_supply[i].append(top_cluster_chromosomes[RM_component_index][j][0][mask_order[mask_order_index][i]])
         
         # receiver
-        print("old:" , receiver[1])
+        # print("old:" , receiver[1]) # receiver original score
         temp_receiver = deepcopy(receiver[0])
         for i in range(len(mask_order[mask_order_index])):
             mu = np.mean(donor_supply[i])
             sigma = np.std(donor_supply[i])
             donor = random.gauss(mu, sigma)
-            # set_trace()  
             temp_receiver[mask_order[mask_order_index][i]] = donor
 
-        new_score = evaluate(temp_receiver, config['op']['task'])
-        print("new:" , new_score)
+        update_score = evaluate(temp_receiver, config['op']['task'])
+        # print("new:" , update_score)
+
+        if update_score > receiver[1]:
+            cluster_chromosomes[RM_component_index][RM_receiver_index][0] = temp_receiver
+            cluster_chromosomes[RM_component_index][RM_receiver_index][1] = update_score
 
 
         # np.mean(np.array(top_cluster_chromosomes[RM_component_index], dtype = object), axis=0)
-
-    
-        # ! Goal: to change the elements of solutions
-        # set_trace()
+        solutions = []
+        for i in range(config['hp']['components']):
+            for j in range(len(cluster_chromosomes[i])):
+                solutions.append(cluster_chromosomes[i][j])
+        # ! Goal: to change the elements of solutions  
         optimizer.tell(solutions) # ! to CMAES 
+
+
 
 if not hit:
     print(Fore.YELLOW + Style.BRIGHT + "not hit global optimal")
