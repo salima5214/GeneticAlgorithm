@@ -167,6 +167,42 @@ def reductDimension(MI_points, mask_order_index):
             chromosomes[i].append(MI_points[i][mask_order[mask_order_index][j]])
     return chromosomes
 
+def RM(RM_count):
+    # random.seed(1)
+    RM_component_index = random.randint(0, config['hp']['components']-1)
+    
+    # ? donor supply
+    donor_supply  = []
+    for i in range(len(mask_order[mask_order_index])):
+        donor_supply.append([])
+        for j in range(len(top_cluster_chromosomes[RM_component_index])):
+            donor_supply[i].append(top_cluster_chromosomes[RM_component_index][j][0][mask_order[mask_order_index][i]])
+    
+    for i in range(RM_count):
+        RM_receiver_index = random.randint(0, len(cluster_chromosomes[RM_component_index])-1)
+        receiver = cluster_chromosomes[RM_component_index][RM_receiver_index] # ? receiver       
+        
+        # receiver
+        # print("old:" , receiver[1]) # receiver original score
+        temp_receiver = deepcopy(receiver[0])
+        for i in range(len(mask_order[mask_order_index])):
+            mu = np.mean(donor_supply[i])
+            sigma = np.std(donor_supply[i])
+            donor = random.gauss(mu, sigma)
+            temp_receiver[mask_order[mask_order_index][i]] = donor
+
+        update_score = evaluate(temp_receiver, config['op']['task'])
+        # print("new:" , update_score)
+
+        if update_score > receiver[1]:
+            cluster_chromosomes[RM_component_index][RM_receiver_index][0] = temp_receiver
+            cluster_chromosomes[RM_component_index][RM_receiver_index][1] = update_score
+    
+    return cluster_chromosomes
+
+
+
+
 points = np.ndarray((generations, optimizer.population_size, config['hp']['dim']))
 
 printInfo(config)
@@ -218,6 +254,7 @@ for g in range(generations):
 # """
         # solutions.append((point,score)) # ! to CMAES
         # cluster
+
         cluster_chromosomes = [[] for i in range(config['hp']['components'])]
         for i in range(0, len(solutions)):
             cluster_chromosomes[cluster[i]].append(solutions[i])
@@ -229,46 +266,15 @@ for g in range(generations):
         for i in range(config['hp']['components']):
             top_number.append(int((len(cluster_chromosomes[i]) * config['hp']['fitess_top_proportion'])))
 
+
+        # TODO: RM & BM use sample method
         # ! to calculate mean & std for donor
         top_cluster_chromosomes = [[] for i in range(config['hp']['components'])]
         for i in range(config['hp']['components']):
             top_cluster_chromosomes[i] = cluster_chromosomes[i][:top_number[i]]
+     
 
-        # random.seed(1)
-        RM_component_index = random.randint(0, config['hp']['components']-1)
-        RM_receiver_index = random.randint(0, len(cluster_chromosomes[RM_component_index])-1)
-        receiver = cluster_chromosomes[RM_component_index][RM_receiver_index] # ? receiver       
-        
-
-        top_cluster_chromosomes[RM_component_index] # ! to calculate mean & std for donor
-
-        # TODO: RM & BM use sample method
-        # ? sample donor
-        donor_supply  = []
-         
-        for i in range(len(mask_order[mask_order_index])):
-            donor_supply.append([])
-            for j in range(len(top_cluster_chromosomes[RM_component_index])):
-                donor_supply[i].append(top_cluster_chromosomes[RM_component_index][j][0][mask_order[mask_order_index][i]])
-        
-        # receiver
-        # print("old:" , receiver[1]) # receiver original score
-        temp_receiver = deepcopy(receiver[0])
-        for i in range(len(mask_order[mask_order_index])):
-            mu = np.mean(donor_supply[i])
-            sigma = np.std(donor_supply[i])
-            donor = random.gauss(mu, sigma)
-            temp_receiver[mask_order[mask_order_index][i]] = donor
-
-        update_score = evaluate(temp_receiver, config['op']['task'])
-        # print("new:" , update_score)
-
-        if update_score > receiver[1]:
-            cluster_chromosomes[RM_component_index][RM_receiver_index][0] = temp_receiver
-            cluster_chromosomes[RM_component_index][RM_receiver_index][1] = update_score
-
-
-        # np.mean(np.array(top_cluster_chromosomes[RM_component_index], dtype = object), axis=0)
+        cluster_chromosomes = RM(1) # ! RM
         solutions = []
         for i in range(config['hp']['components']):
             for j in range(len(cluster_chromosomes[i])):
