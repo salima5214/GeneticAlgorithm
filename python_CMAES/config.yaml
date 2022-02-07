@@ -22,7 +22,9 @@ hp:
   components: 2
   fitess_top_proportion: 0.2
 
-  RM_time: 0 # 0: without RM_BM 
+  force_replace: True
+
+  RM_time: 1 # 0: without RM_BM 
   
   np_seed: 1
   cma_seed: 1
