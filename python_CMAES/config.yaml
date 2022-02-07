@@ -6,7 +6,7 @@ op:
 #  2: Rastrigin
 #  3: Michalewicz
 #----------------------------
-  mask_order: 0
+  mask_order: 1
 #----------------------------
 #  0: linkage tree order
 #  1: incremental linkage set (ILS)

@@ -89,7 +89,7 @@ def calculateMI(MI_points, mask_1, mask_2):
     MI = MI / count # FIXME: the way to calculate MI for two masks
     return MI
 
-def LinkageTree(MI_points): # ! Linkage Tree
+def byLinkageTree(MI_points): # ! Linkage Tree
     masks = np.array([[index] for index in range(len(MI_points[0]))])
     MI_points = np.array(MI_points)
     mask_order = []
@@ -119,7 +119,7 @@ def LinkageTree(MI_points): # ! Linkage Tree
         # print("******************************************")
     return mask_order
 
-def ILS(MI_points): # ! ILS
+def byIncrementalLinkageSet(MI_points): # ! ILS
     random.seed(1)
     init_index = random.randint(0, len(MI_points[0])-1)
     # print("init_index: ", init_index)
@@ -153,9 +153,9 @@ def ILS(MI_points): # ! ILS
 
 def buildMaskOrder(MI_points, config):
     if config['op']['mask_order'] == 0: #  0: linkage tree order    
-        return LinkageTree(MI_points)
+        return byLinkageTree(MI_points)
     elif config['op']['mask_order'] == 1: #  1: incremental linkage set
-        return ILS(MI_points)
+        return byIncrementalLinkageSet(MI_points)
 
 def reductDimension(MI_points, mask_order_index):
     chromosomes = []
