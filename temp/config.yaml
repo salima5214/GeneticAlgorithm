@@ -19,6 +19,4 @@ hp:
   bound_min: 0
   bound_max: 5
   init_mean: 2.5
-  components: 2
-  fitess_top_proportion: 0.2
   np_seed: 1

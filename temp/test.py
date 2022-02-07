@@ -2,32 +2,8 @@ import numpy as np
 
 
 
-import random
-  
-# determining the values of the parameters
-mu = 100
-sigma = 50
-  
-# using the gauss() method
-print(random.gauss(mu, sigma))
 
 
-# !
-# mu, sigma = 0, 0.1 # mean and standard deviation
-# s = np.random.normal(mu, sigma, 5)
-
-# print(s)
-# print(type(s))
-
-# !
-# cluster_chromosomes = [([33, 333], 3), ([55, 555], 5), ([4, 444], 4)]
-# print(cluster_chromosomes)
-# cluster_chromosomes.sort(key = lambda x: x[1])
-# print(cluster_chromosomes)
-
-# !
-# cluster_chromosomes = [[] for i in range(2)]
-# print(cluster_chromosomes)
 
 # !
 # import colorama

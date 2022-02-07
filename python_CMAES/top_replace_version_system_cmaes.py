@@ -99,7 +99,7 @@ def byLinkageTree(MI_points): # ! Linkage Tree
         for mask_index1 in range(0, len(masks)-1):
             for mask_index2 in range(mask_index1+1, len(masks)): 
                 MI_current = calculateMI(MI_points, masks[mask_index1], masks[mask_index2])
-                if MI_current > MI_max: # or math.isnan(MI_current)
+                if MI_current > MI_max or math.isnan(MI_current):
                     MI_max = MI_current
                     remove_mask_index = np.array([mask_index1, mask_index2])
                     new_mask = np.hstack((masks[mask_index1],  masks[mask_index2]))
@@ -132,7 +132,8 @@ def byIncrementalLinkageSet(MI_points): # ! ILS
         for out_mask_index in out_mask:
             for in_mask_index in in_mask: 
                 MI_current = calculateMI(np.array(MI_points), np.array([out_mask_index]), np.array(in_mask))
-                if MI_current > MI_max or math.isnan(MI_current):
+                # if MI_current > MI_max or math.isnan(MI_current):
+                if MI_current > MI_max:
                     MI_max = MI_current
                     remove_mask_index = out_mask_index
 
@@ -167,6 +168,8 @@ def reductDimension(MI_points, mask_order_index):
     return chromosomes
 
 points = np.ndarray((generations, optimizer.population_size, config['hp']['dim']))
+points_1 = np.ndarray((generations, optimizer.population_size, config['hp']['dim']))
+points_2 = np.ndarray((generations, optimizer.population_size, config['hp']['dim']))
 
 printInfo(config)
 for g in range(generations):
@@ -192,84 +195,63 @@ for g in range(generations):
                     record = [g+1, NFE]
                     writer_object.writerow(record)  
                     f_object.close()
-            solutions.append((point,score)) # ! to CMAES
-            MI_points.append(point) # ? to calculate MI for buildMask
+            solutions.append((point,score))
+            MI_points.append(point) # ! to calculate MI for buildMask
             scores.append(score)
 
-        mask_order = buildMaskOrder(MI_points, config) # ? to get mask order 
+        mask_order = buildMaskOrder(MI_points, config) # ! to get mask order 
     
         # print(mask_order)
-        mask_order_index = 0
-        chromosomes = reductDimension(MI_points, mask_order_index) # 0 means the index of mask_order # TODO: the index of mask_order automatically
+        chromosomes = reductDimension(MI_points, 0) # 0 means the index of mask_order # TODO: the index of mask_order automatically
         # print("generations: {}, mask_order: {}".format(g, mask_order))
-        EM = GaussianMixture( n_components = config['hp']['components'])
+        EM = GaussianMixture( n_components = 2)
         EM.fit(chromosomes)
         cluster = EM.predict(chromosomes)   
-# """
-#         flow:
-#         1. 根據 cluster 的值 分成 n 群 # ! ok
-#         2. 每群計算 mean 以及 std (從每群中fitness分數較高的) # ! ok
-#         3. 同群中隨機挑一個 chromosome 當作 Recevier  # ! ok
-#         4. 由 同群 2. sample 出一個 Donor # ! ok
-#         5. Donor 給 Recevier 看 fitness 有無變好
-#         6. 有變好的話, sample (Donor) 給其他群試試 (其他群先 隨機挑一個 chromosome 當作 Recevier)
-#         # ? solutions [ (array([dim0_value, dim1_value, dim2_value]), fitness_score), (array([dim0_value, dim1_value, dim2_value]), fitness_score), ...]
-# """
-        # solutions.append((point,score)) # ! to CMAES
-        # cluster
-        cluster_chromosomes = [[] for i in range(config['hp']['components'])]
-        for i in range(0, len(solutions)):
-            cluster_chromosomes[cluster[i]].append(solutions[i])
 
-        for i in range(config['hp']['components']):
-            cluster_chromosomes[i].sort(key = lambda x: x[1])
+#########################################################################################
+#########################################################################################
+#########################################################################################
 
-        top_number = []
-        for i in range(config['hp']['components']):
-            top_number.append(int((len(cluster_chromosomes[i]) * config['hp']['fitess_top_proportion'])))
-
-        # ! to calculate mean & std for donor
-        top_cluster_chromosomes = [[] for i in range(config['hp']['components'])]
-        for i in range(config['hp']['components']):
-            top_cluster_chromosomes[i] = cluster_chromosomes[i][:top_number[i]]
-
-        random.seed(1)
-        RM_component_index = random.randint(0, config['hp']['components']-1)
-        RM_receiver_index = random.randint(0, len(cluster_chromosomes[RM_component_index])-1)
-        receiver = cluster_chromosomes[RM_component_index][RM_receiver_index] # ? receiver       
-        
-
-        top_cluster_chromosomes[RM_component_index] # ! to calculate mean & std for donor
+        min_index_list = list(map(scores.index, heapq.nsmallest(100, scores)))
+        count_0 = 0
+        count_1 = 0
+        chromosomes_0 = []
+        chromosomes_1 = []
+        # TODO: cluster automatically
+        for i in range(100):
+            if cluster[min_index_list[i]] == 0 and count_0 <= 20:
+                chromosomes_0.append((solutions[min_index_list[i]], min_index_list[i]))
+                count_0 += 1
+            elif cluster[min_index_list[i]] == 1 and count_1 <= 20:
+                chromosomes_1.append((solutions[min_index_list[i]], min_index_list[i]))
+                count_1 += 1
+            elif count_0 <= 20 or count_1 <= 20:
+                continue
+            else:
+                break
 
         # TODO: RM & BM use sample method
-        # ? sample donor
-        donor_supply  = []
-         
-        for i in range(len(mask_order[mask_order_index])):
-            donor_supply.append([])
-            for j in range(len(top_cluster_chromosomes[RM_component_index])):
-                donor_supply[i].append(top_cluster_chromosomes[RM_component_index][j][0][mask_order[mask_order_index][i]])
-        
-        # receiver
-        print("old:" , receiver[1])
-        temp_receiver = deepcopy(receiver[0])
-        for i in range(len(mask_order[mask_order_index])):
-            mu = np.mean(donor_supply[i])
-            sigma = np.std(donor_supply[i])
-            donor = random.gauss(mu, sigma)
-            # set_trace()  
-            temp_receiver[mask_order[mask_order_index][i]] = donor
-
-        new_score = evaluate(temp_receiver, config['op']['task'])
-        print("new:" , new_score)
-
-
-        # np.mean(np.array(top_cluster_chromosomes[RM_component_index], dtype = object), axis=0)
-
-    
-        # ! Goal: to change the elements of solutions
-        # set_trace()
-        optimizer.tell(solutions) # ! to CMAES 
+        for i in range(5): 
+            # set_trace()
+            if g <= 3 and chromosomes_0[i][0][1] < chromosomes_1[i][0][1]:
+                temp = deepcopy(solutions[chromosomes_1[i][1]])
+                temp[0][mask_order[0][0]] = solutions[chromosomes_0[i][1]][0][mask_order[0][0]]
+                temp[0][mask_order[0][1]] = solutions[chromosomes_0[i][1]][0][mask_order[0][1]]
+                # if evaluate(temp[0], config['op']['task']) < evaluate(solutions[chromosomes_1[i][1]][0], config['op']['task']):
+                if True:
+                    # print("+++++++++++++++++++")
+                    solutions[chromosomes_1[i][1]][0][mask_order[0][0]] = solutions[chromosomes_0[i][1]][0][mask_order[0][0]]
+                    solutions[chromosomes_1[i][1]][0][mask_order[0][1]] = solutions[chromosomes_0[i][1]][0][mask_order[0][1]]
+            elif g <= 3 and chromosomes_0[i][0][1] > chromosomes_1[i][0][1]:
+                temp = deepcopy(solutions[chromosomes_0[i][1]])
+                temp[0][mask_order[0][0]] = solutions[chromosomes_1[i][1]][0][mask_order[0][0]]
+                temp[0][mask_order[0][1]] = solutions[chromosomes_1[i][1]][0][mask_order[0][1]]
+                # if evaluate(temp[0], config['op']['task']) < evaluate(solutions[chromosomes_0[i][1]][0], config['op']['task']):
+                if True:
+                    # print("#####################")
+                    solutions[chromosomes_0[i][1]][0][mask_order[0][0]] = solutions[chromosomes_1[i][1]][0][mask_order[0][0]]
+                    solutions[chromosomes_0[i][1]][0][mask_order[0][1]] = solutions[chromosomes_1[i][1]][0][mask_order[0][1]]
+        optimizer.tell(solutions)
 
 if not hit:
     print(Fore.YELLOW + Style.BRIGHT + "not hit global optimal")
@@ -278,7 +260,8 @@ if not hit:
         record = [-1, -1]
         writer_object.writerow(record)  
         f_object.close()
-
+    # print("generations = {}".format(g+1))
+    # print("NFE = {}".format(NFE))
 
  
 
