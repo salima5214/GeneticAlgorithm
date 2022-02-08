@@ -17,16 +17,19 @@ from colorama import Fore
 from colorama import Style
 
 
-# parser = argparse.ArgumentParser()
-# parser.add_argument("top", help="top number", type=int)
-# args = parser.parse_args()
+parser = argparse.ArgumentParser()
+parser.add_argument("dim", help="dim", type=int)
+parser.add_argument("RM_time", help="RM_time", type=int)
+args = parser.parse_args()
 
 config = yaml.load(open('./config.yaml', 'r'), Loader=yaml.FullLoader)
 
 # hyperparameter settings
 np.random.seed(config['hp']['np_seed'])
 NFE = 0
-dim = config['hp']['dim']
+# dim = config['hp']['dim']
+config['hp']['dim'] = args.dim
+dim = args.dim
 generations = config['hp']['generations']
 hit = False
 my_bound_min = config['hp']['bound_min']
@@ -38,6 +41,10 @@ init_mean = config['hp']['init_mean']
 my_mean = np.ones(dim)*init_mean
 
 optimizer = CMA(mean=my_mean, bounds=my_bounds, sigma=0.5, n_max_resampling=1)
+
+
+
+
 
 # print information of this experiment
 def printInfo(config):
@@ -257,7 +264,7 @@ for g in range(generations):
                 hit = True
                 with open('record_{}.csv'.format(time.strftime("%Y-%m-%d", time.localtime())), 'a', newline='') as f_object:  
                     writer_object = writer(f_object)
-                    record = [g+1, NFE]
+                    record = [NFE]
                     writer_object.writerow(record)  
                     f_object.close()
             solutions.append([point,score]) # ! to CMAES
@@ -304,7 +311,7 @@ for g in range(generations):
         for i in range(config['hp']['components']):
             top_cluster_chromosomes[i] = cluster_chromosomes[i][:top_number[i]]
      
-
+        config['hp']['RM_time'] = args.RM_time
         cluster_chromosomes = RM_BM(config['hp']['RM_time']) # ! RM
         solutions = []
         for i in range(config['hp']['components']):
@@ -319,7 +326,7 @@ if not hit:
     print(Fore.YELLOW + Style.BRIGHT + "not hit global optimal")
     with open('record_{}.csv'.format(time.strftime("%Y-%m-%d", time.localtime())), 'a', newline='') as f_object:  
         writer_object = writer(f_object)
-        record = [-1, -1]
+        record = [-1]
         writer_object.writerow(record)  
         f_object.close()
 
