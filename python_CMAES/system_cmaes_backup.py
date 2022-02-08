@@ -268,47 +268,56 @@ for g in range(generations):
                     writer_object.writerow(record)  
                     f_object.close()
             solutions.append([point,score]) # ! to CMAES
-# !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!            
             MI_points.append(point) # ? to calculate MI for buildMask
             scores.append(score)
 
-        if g <= 3:
-            mask_order = buildMaskOrder(MI_points, config) # ? to get mask order 
-        
-            # print(mask_order)
-            mask_order_index = 0
-            chromosomes = reductDimension(MI_points, mask_order_index) # 0 means the index of mask_order # TODO: the index of mask_order automatically
-            # print("generations: {}, mask_order: {}".format(g, mask_order))
-            EM = GaussianMixture( n_components = config['hp']['components'])
-            EM.fit(chromosomes)
-            cluster = EM.predict(chromosomes)   
+        mask_order = buildMaskOrder(MI_points, config) # ? to get mask order 
+    
+        # print(mask_order)
+        mask_order_index = 0
+        chromosomes = reductDimension(MI_points, mask_order_index) # 0 means the index of mask_order # TODO: the index of mask_order automatically
+        # print("generations: {}, mask_order: {}".format(g, mask_order))
+        EM = GaussianMixture( n_components = config['hp']['components'])
+        EM.fit(chromosomes)
+        cluster = EM.predict(chromosomes)   
+# """
+#         flow:
+#         1. 根據 cluster 的值 分成 n 群 # ! ok
+#         2. 每群計算 mean 以及 std (從每群中fitness分數較高的) # ! ok
+#         3. 同群中隨機挑一個 chromosome 當作 Recevier  # ! ok
+#         4. 由 同群 2. sample 出一個 Donor # ! ok
+#         5. Donor 給 Recevier 看 fitness 有無變好 # ! ok
+#         6. 有變好的話, sample (Donor) 給其他群試試 (其他群先 隨機挑一個 chromosome 當作 Recevier) # ! ok
+#         # ? solutions [ (array([dim0_value, dim1_value, dim2_value]), fitness_score), (array([dim0_value, dim1_value, dim2_value]), fitness_score), ...]
+# """
+        # solutions.append((point,score)) # ! to CMAES
+        # cluster
 
-            cluster_chromosomes = [[] for i in range(config['hp']['components'])]
-            for i in range(0, len(solutions)):
-                cluster_chromosomes[cluster[i]].append(solutions[i])
+        cluster_chromosomes = [[] for i in range(config['hp']['components'])]
+        for i in range(0, len(solutions)):
+            cluster_chromosomes[cluster[i]].append(solutions[i])
 
-            for i in range(config['hp']['components']):
-                cluster_chromosomes[i].sort(key = lambda x: x[1])
+        for i in range(config['hp']['components']):
+            cluster_chromosomes[i].sort(key = lambda x: x[1])
 
-            top_number = []
-            for i in range(config['hp']['components']):
-                top_number.append(int((len(cluster_chromosomes[i]) * config['hp']['fitess_top_proportion'])))
+        top_number = []
+        for i in range(config['hp']['components']):
+            top_number.append(int((len(cluster_chromosomes[i]) * config['hp']['fitess_top_proportion'])))
 
 
-            # TODO: RM & BM use sample method
-            # ! to calculate mean & std for donor
-            top_cluster_chromosomes = [[] for i in range(config['hp']['components'])]
-            for i in range(config['hp']['components']):
-                top_cluster_chromosomes[i] = cluster_chromosomes[i][:top_number[i]]
-        
-            config['hp']['RM_time'] = args.RM_time
-            cluster_chromosomes = RM_BM(config['hp']['RM_time']) # ! RM
-            solutions = []
-            for i in range(config['hp']['components']):
-                for j in range(len(cluster_chromosomes[i])):
-                    solutions.append(cluster_chromosomes[i][j])
+        # TODO: RM & BM use sample method
+        # ! to calculate mean & std for donor
+        top_cluster_chromosomes = [[] for i in range(config['hp']['components'])]
+        for i in range(config['hp']['components']):
+            top_cluster_chromosomes[i] = cluster_chromosomes[i][:top_number[i]]
+     
+        config['hp']['RM_time'] = args.RM_time
+        cluster_chromosomes = RM_BM(config['hp']['RM_time']) # ! RM
+        solutions = []
+        for i in range(config['hp']['components']):
+            for j in range(len(cluster_chromosomes[i])):
+                solutions.append(cluster_chromosomes[i][j])
         # ! Goal: to change the elements of solutions  
-# !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! 
         optimizer.tell(solutions) # ! to CMAES 
 
 

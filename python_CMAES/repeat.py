@@ -25,12 +25,12 @@ config = yaml.load(open('./config.yaml', 'r'), Loader=yaml.FullLoader)
 def write_info():
     with open('record_{}.csv'.format(time.strftime("%Y-%m-%d", time.localtime())), 'a', newline='') as f_object:  
         writer_object = writer(f_object)
-        record = ["time :{}, task:{}, dimension:{}, bound_min:{}, bound_max:{}, init_mean:{}, fitess_top_proportion:{}, np_seed:{}, cma_seed:{}, RM_time:{}".format(
+        record = ["time :{}, task:{}, dimension:{}, components:{}, mask_order:{}, init_mean:{}, fitess_top_proportion:{}, np_seed:{}, cma_seed:{}, RM_time:{}".format(
             time.strftime("%m%d-%H%M", time.localtime()),
             config['op']['mask_order'],
             dim, # ! dim
-            config['hp']['bound_min'],
-            config['hp']['bound_max'],
+            config['hp']['components'],
+            config['op']['mask_order'],
             config['hp']['init_mean'],
             config['hp']['fitess_top_proportion'],
             config['hp']['np_seed'],
@@ -40,7 +40,7 @@ def write_info():
         f_object.close()
 
 dim = 3
-while dim <= 16:
+while dim <= 10:
     for RM_time in range(0, 2):
         if RM_time == 0:
             write_info()
