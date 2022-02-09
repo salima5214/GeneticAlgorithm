@@ -1,0 +1,62 @@
+"time :0209-0133, task:1, dimension:32, components:2, mask_order:1, init_mean:2.5, fitess_top_proportion:0.2, np_seed:1, cma_seed:1, RM_time:1"
+-1
+-1
+-1
+-1
+"time :0209-1057, task:1, dimension:5, components:2, mask_order:1, init_mean:2.5, fitess_top_proportion:0.2, np_seed:1, cma_seed:1, RM_time:1"
+3268
+"time :0209-1057, task:1, dimension:5, components:2, mask_order:1, init_mean:2.5, fitess_top_proportion:0.2, np_seed:1, cma_seed:1, RM_time:1"
+768
+"time :0209-1058, task:1, dimension:10, components:2, mask_order:1, init_mean:2.5, fitess_top_proportion:0.2, np_seed:1, cma_seed:1, RM_time:1"
+"time :0209-1059, task:1, dimension:3, components:2, mask_order:1, init_mean:2.5, fitess_top_proportion:0.2, np_seed:1, cma_seed:1, RM_time:0"
+1407
+"time :0209-1059, task:1, dimension:4, components:2, mask_order:1, init_mean:2.5, fitess_top_proportion:0.2, np_seed:1, cma_seed:1, RM_time:0"
+3562
+"time :0209-1059, task:1, dimension:5, components:2, mask_order:1, init_mean:2.5, fitess_top_proportion:0.2, np_seed:1, cma_seed:1, RM_time:0"
+2703
+"time :0209-1059, task:1, dimension:6, components:2, mask_order:1, init_mean:2.5, fitess_top_proportion:0.2, np_seed:1, cma_seed:1, RM_time:0"
+7042
+"time :0209-1100, task:1, dimension:3, components:2, mask_order:1, init_mean:2.5, fitess_top_proportion:0.2, np_seed:1, cma_seed:1, RM_time:0"
+646
+"time :0209-1100, task:1, dimension:4, components:2, mask_order:1, init_mean:2.5, fitess_top_proportion:0.2, np_seed:1, cma_seed:1, RM_time:0"
+886
+"time :0209-1100, task:1, dimension:5, components:2, mask_order:1, init_mean:2.5, fitess_top_proportion:0.2, np_seed:1, cma_seed:1, RM_time:0"
+1069
+"time :0209-1100, task:1, dimension:6, components:2, mask_order:1, init_mean:2.5, fitess_top_proportion:0.2, np_seed:1, cma_seed:1, RM_time:0"
+1075
+"time :0209-1100, task:1, dimension:3, components:2, mask_order:1, init_mean:2.5, fitess_top_proportion:0.2, np_seed:1, cma_seed:1, RM_time:0"
+1407
+"time :0209-1100, task:1, dimension:4, components:2, mask_order:1, init_mean:2.5, fitess_top_proportion:0.2, np_seed:1, cma_seed:1, RM_time:0"
+3562
+"time :0209-1100, task:1, dimension:5, components:2, mask_order:1, init_mean:2.5, fitess_top_proportion:0.2, np_seed:1, cma_seed:1, RM_time:0"
+2703
+"time :0209-1101, task:1, dimension:6, components:2, mask_order:1, init_mean:2.5, fitess_top_proportion:0.2, np_seed:1, cma_seed:1, RM_time:0"
+7042
+"time :0209-1101, task:1, dimension:3, components:2, mask_order:1, init_mean:2.5, fitess_top_proportion:0.2, np_seed:1, cma_seed:1, RM_time:0"
+646
+"time :0209-1101, task:1, dimension:4, components:2, mask_order:1, init_mean:2.5, fitess_top_proportion:0.2, np_seed:1, cma_seed:1, RM_time:0"
+886
+"time :0209-1101, task:1, dimension:5, components:2, mask_order:1, init_mean:2.5, fitess_top_proportion:0.2, np_seed:1, cma_seed:1, RM_time:0"
+1069
+"time :0209-1101, task:1, dimension:6, components:2, mask_order:1, init_mean:2.5, fitess_top_proportion:0.2, np_seed:1, cma_seed:1, RM_time:0"
+1075
+#####################"time :0209-1102, task:1, dimension:3, components:2, mask_order:1, init_mean:2.5, fitess_top_proportion:0.2, np_seed:1, cma_seed:1, RM_time:0"
+1407
+"time :0209-1102, task:1, dimension:4, components:2, mask_order:1, init_mean:2.5, fitess_top_proportion:0.2, np_seed:1, cma_seed:1, RM_time:0"
+3562
+"time :0209-1102, task:1, dimension:5, components:2, mask_order:1, init_mean:2.5, fitess_top_proportion:0.2, np_seed:1, cma_seed:1, RM_time:0"
+2703
+"time :0209-1102, task:1, dimension:6, components:2, mask_order:1, init_mean:2.5, fitess_top_proportion:0.2, np_seed:1, cma_seed:1, RM_time:0"
+7042
+"time :0209-1102, task:1, dimension:10, components:2, mask_order:1, init_mean:2.5, fitess_top_proportion:0.2, np_seed:1, cma_seed:1, RM_time:0"
+"time :0209-1103, task:1, dimension:10, components:2, mask_order:1, init_mean:2.5, fitess_top_proportion:0.2, np_seed:1, cma_seed:1, RM_time:0"
+"time :0209-1103, task:1, dimension:16, components:2, mask_order:1, init_mean:2.5, fitess_top_proportion:0.2, np_seed:1, cma_seed:1, RM_time:0"
+"time :0209-1104, task:1, dimension:16, components:2, mask_order:1, init_mean:2.5, fitess_top_proportion:0.2, np_seed:1, cma_seed:1, RM_time:0"
+"time :0209-1104, task:1, dimension:5, components:2, mask_order:1, init_mean:2.5, fitess_top_proportion:0.2, np_seed:1, cma_seed:1, RM_time:0"
+1069
+"time :0209-1105, task:1, dimension:5, components:2, mask_order:1, init_mean:2.5, fitess_top_proportion:0.2, np_seed:1, cma_seed:1, RM_time:0"
+1069
+"time :0209-1105, task:1, dimension:8, components:2, mask_order:1, init_mean:2.5, fitess_top_proportion:0.2, np_seed:1, cma_seed:1, RM_time:0"
+2930
+"time :0209-1106, task:1, dimension:8, components:2, mask_order:1, init_mean:2.5, fitess_top_proportion:0.2, np_seed:1, cma_seed:1, RM_time:0"
+9971

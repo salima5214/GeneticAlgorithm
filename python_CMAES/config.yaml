@@ -6,7 +6,7 @@ op:
 #  2: Rastrigin
 #  3: Michalewicz
 #----------------------------
-  mask_order: 0
+  mask_order: 1
 #----------------------------
 #  0: linkage tree order
 #  1: incremental linkage set (ILS)
@@ -19,7 +19,7 @@ hp:
   bound_min: 0
   bound_max: 5
   init_mean: 2.5
-  components: 4
+  components: 2
   fitess_top_proportion: 0.2
 
   # force_replace: True

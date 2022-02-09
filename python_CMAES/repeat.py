@@ -39,14 +39,10 @@ def write_info():
         writer_object.writerow(record)  
         f_object.close()
 
-dim = 3
-while dim <= 10:
-    for RM_time in range(0, 2):
-        if RM_time == 0:
-            write_info()
+dim = 8
+while dim <= 8:
+    for RM_time in range(0, 1):
+        write_info()
+        for i in range(1): 
             os.system("python3 ./system_cmaes.py {} {}".format(dim, RM_time))
-        else:
-            write_info()
-            for i in range(10): 
-                os.system("python3 ./system_cmaes.py {} {}".format(dim, RM_time))
     dim = dim + 1

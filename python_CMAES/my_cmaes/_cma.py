@@ -75,7 +75,7 @@ class CMA:
         bounds: Optional[np.ndarray] = None,
         n_max_resampling: int = 100,
         seed: Optional[int] = config['hp']['cma_seed'], # None config['hp']['cma_seed']
-        population_size: Optional[int] = 100, # None
+        population_size: Optional[int] = 100, # None 100
         cov: Optional[np.ndarray] = None,
     ):
         assert sigma > 0, "sigma must be non-zero positive value"

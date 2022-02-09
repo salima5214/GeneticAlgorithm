@@ -250,7 +250,8 @@ for g in range(generations):
         solutions = []
         scores = []
         MI_points = []
-
+        # print("generations", g)
+        # print("population_size", optimizer.population_size)
         for i in range(optimizer.population_size):
             point = optimizer.ask() # ! sample next chromosome   
             points[g, i] = point # record
@@ -272,41 +273,41 @@ for g in range(generations):
             MI_points.append(point) # ? to calculate MI for buildMask
             scores.append(score)
 
-        if g <= 3:
-            mask_order = buildMaskOrder(MI_points, config) # ? to get mask order 
-        
-            # print(mask_order)
-            mask_order_index = 0
-            chromosomes = reductDimension(MI_points, mask_order_index) # 0 means the index of mask_order # TODO: the index of mask_order automatically
-            # print("generations: {}, mask_order: {}".format(g, mask_order))
-            EM = GaussianMixture( n_components = config['hp']['components'])
-            EM.fit(chromosomes)
-            cluster = EM.predict(chromosomes)   
+    # if g <= 5:
+        mask_order = buildMaskOrder(MI_points, config) # ? to get mask order 
+    
+        # print(mask_order)
+        mask_order_index = 0
+        chromosomes = reductDimension(MI_points, mask_order_index) # 0 means the index of mask_order # TODO: the index of mask_order automatically
+        # print("generations: {}, mask_order: {}".format(g, mask_order))
+        EM = GaussianMixture( n_components = config['hp']['components'])
+        EM.fit(chromosomes)
+        cluster = EM.predict(chromosomes)   
 
-            cluster_chromosomes = [[] for i in range(config['hp']['components'])]
-            for i in range(0, len(solutions)):
-                cluster_chromosomes[cluster[i]].append(solutions[i])
+        cluster_chromosomes = [[] for i in range(config['hp']['components'])]
+        for i in range(0, len(solutions)):
+            cluster_chromosomes[cluster[i]].append(solutions[i])
 
-            for i in range(config['hp']['components']):
-                cluster_chromosomes[i].sort(key = lambda x: x[1])
+        for i in range(config['hp']['components']):
+            cluster_chromosomes[i].sort(key = lambda x: x[1])
 
-            top_number = []
-            for i in range(config['hp']['components']):
-                top_number.append(int((len(cluster_chromosomes[i]) * config['hp']['fitess_top_proportion'])))
+        top_number = []
+        for i in range(config['hp']['components']):
+            top_number.append(int((len(cluster_chromosomes[i]) * config['hp']['fitess_top_proportion'])))
 
 
-            # TODO: RM & BM use sample method
-            # ! to calculate mean & std for donor
-            top_cluster_chromosomes = [[] for i in range(config['hp']['components'])]
-            for i in range(config['hp']['components']):
-                top_cluster_chromosomes[i] = cluster_chromosomes[i][:top_number[i]]
-        
-            config['hp']['RM_time'] = args.RM_time
-            cluster_chromosomes = RM_BM(config['hp']['RM_time']) # ! RM
-            solutions = []
-            for i in range(config['hp']['components']):
-                for j in range(len(cluster_chromosomes[i])):
-                    solutions.append(cluster_chromosomes[i][j])
+        # TODO: RM & BM use sample method
+        # ! to calculate mean & std for donor
+        top_cluster_chromosomes = [[] for i in range(config['hp']['components'])]
+        for i in range(config['hp']['components']):
+            top_cluster_chromosomes[i] = cluster_chromosomes[i][:top_number[i]]
+    
+        config['hp']['RM_time'] = args.RM_time
+        cluster_chromosomes = RM_BM(config['hp']['RM_time']) # ! RM
+        solutions = []
+        for i in range(config['hp']['components']):
+            for j in range(len(cluster_chromosomes[i])):
+                solutions.append(cluster_chromosomes[i][j])
         # ! Goal: to change the elements of solutions  
 # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! 
         optimizer.tell(solutions) # ! to CMAES 
