@@ -13,6 +13,19 @@ print(random.gauss(mu, sigma))
 
 
 # !
+# import numpy as np
+
+# data = np.array([
+# [1, 2, 3],
+# [4, 5 ,6]
+# ])
+
+
+# print(data)
+# print(data[:,1])
+
+
+# !
 # mu, sigma = 0, 0.1 # mean and standard deviation
 # s = np.random.normal(mu, sigma, 5)
 
